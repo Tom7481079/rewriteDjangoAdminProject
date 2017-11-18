@@ -1,0 +1,188 @@
+{% extends 'kind_admin/kind_admin_index.html' %}
+{% load tags %}
+{% block css %}
+    <style>
+        .select-filter-div{
+            min-width: 800px;
+            width: 100%;
+            min-height: 40px;
+            margin-bottom: 10px;
+        }
+        .select-filter-div .select-width{
+            width: auto;
+            float: left;
+            min-width: 160px;
+        }
+        .select-label{
+            float: left;
+            font-size: 18px;
+            font-weight: bold;
+            height: 30px;
+            line-height: 30px;
+            color:lightgrey;
+            margin-left: 20px
+        }
+        .btn-format{
+            display: inline-block;
+            margin-left: 20px;
+            font-weight: bold;
+        }
+
+
+        ul li{
+            list-style: none;
+        }
+        .pagination li{
+            float: left;
+            margin: 5px;
+        }
+        .active{
+            background-color: brown;
+        }
+
+
+
+
+    </style>
+{% endblock %}
+
+{% block url_block %}
+    <span> > </span> <a href="/kind_admin/" style="color: white;font-weight: bold">{{ app_name }}</a>
+    <span> > {{ table_name_detail }}</span>
+    {% if not admin_class.readonly_table %}
+        <div style="float: right;width: 30%;">
+            <a style="color: white" href="{{ request.path }}add/">Add {{ table_name_detail }}</a>
+        </div>
+    {% endif %}
+
+
+
+{% endblock %}
+
+
+{% block container %}
+
+    <div class="bs-example" data-example-id="simple-table">
+        <form>
+            {% if admin_class.list_filter %}
+                <div class="select-filter-div">
+                    {% for filter_field in admin_class.list_filter %}
+                        <div>
+                            <div class="select-label">{{ filter_field }}:&nbsp; </div>
+                            {% render_filter_ele filter_field admin_class filter_conditions %}
+                        </div>
+                    {% endfor %}
+
+                    <button type="submit" class="btn btn-default btn-format">检索</button>
+                </div>
+            {% endif %}
+            {% if admin_class.search_fields %}
+                <div class="select-filter-div">
+                      <div style="float: left;margin-left: 47px;line-height: 30px">
+                          <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                      </div>
+                      <div class="form-group" style="width: 30%;margin-left: 10px;float: left;">
+                        <input type="text" name="_q" class="form-control" placeholder="{{ search_text }}" value="{{ search_filter_text }}">
+                      </div>
+                      <button type="submit" class="btn btn-default btn-format" style="float: left">搜索</button>
+                </div>
+            {% endif %}
+        </form>
+
+        <form method="post" onsubmit="return ActionSubmit(this);">
+          <div class="select-filter-div">
+                  <div style="float: left;margin-left: 20px;line-height: 30px">
+                    Action:
+                  </div>
+                  <div class="form-group" style="width: 30%;margin-left: 10px;float: left;">
+                        <select class="form-control" name="action" id="action_choosed">
+                                <option value="">-----------</option>
+                            {% for action in admin_class.actions %}
+                                <option value="{{ action }}">{{ action }}</option>
+                            {% endfor %}
+                        </select>
+                  </div>
+                  <button type="submit" class="btn btn-default btn-format" style="float: left">GO</button>
+            </div>
+        </form>
+
+        <table class="table table-hover">
+          <thead>
+            <tr>
+                <th><input type="checkbox" onclick="CheckAllSelect(this);"></th>
+                {% for column in admin_class.list_display %}
+                    {% build_table_header_column column admin_class filter_conditions search_filter_text orderby_key %}
+                {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+             {% for obj in obj_list %}
+                <tr>
+                    <td><input tag="obj_checkbox" class="obj_ck" type="checkbox" name="choose_name" value="{{ obj.id }}"></td>
+                    {% build_table_row request obj admin_class search_filter_text %}
+                </tr>
+             {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    <div class="pagination">
+        <nav aria-label="Page navigation">
+          <ul class="pagination">
+            {% if obj_list.has_previous %}
+                <li><a href="?page={{ obj_list.previous_page_number }}&_q={{ search_filter_text }}&o={{ previous_orderby }}{% render_filter_conditions filter_conditions %}">上一页</a></li>
+            {% endif %}
+
+            {% for loop_counter in obj_list.paginator.page_range %}
+                {% render_page_ele loop_counter obj_list filter_conditions search_filter_text previous_orderby %}
+            {% endfor %}
+
+            {% if obj_list.has_next %}
+                <li><a href="?page={{ obj_list.next_page_number }}&_q={{ search_filter_text }}&o={{ previous_orderby }}{% render_filter_conditions filter_conditions %}">下一页</a></li>
+            {% endif %}
+          </ul>
+        </nav>
+    </div>
+{% endblock %}
+
+
+
+
+
+
+
+{% block js %}
+    <script>
+        function CheckAllSelect(ths) {
+            if ($(ths).prop('checked')) {
+                $('input[tag="obj_checkbox"]').prop('checked',true);
+            }
+            else {
+                $('input[tag="obj_checkbox"]').prop('checked',false);
+            }
+        }
+        function ActionSubmit(ths) {
+            var selected_ids = [];
+            $('input[tag="obj_checkbox"]:checked').each(function () {
+                selected_ids.push($(this).val())
+            });
+            var action_choosed = $("#action_choosed").val();
+            if (!selected_ids.length){
+                alert('必须选择操作条目！');
+                return false;
+            }
+            if (!action_choosed.length){
+                alert('必须选择要操作的action！');
+                return false;
+            }
+            var inp = document.createElement('input');
+            inp.value = selected_ids.toString();
+            inp.setAttribute('name','selected_ids');
+            inp.setAttribute('type','hidden')
+            $(ths).append(inp);
+            return true;
+        }
+
+    </script>
+
+
+{% endblock %}

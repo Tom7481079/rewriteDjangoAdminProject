@@ -1,0 +1,131 @@
+{% extends 'kind_admin/kind_admin_index.html' %}
+{% load tags %}
+{% block css %}
+    <style>
+        .filter-select-box{
+            height: 300px!important;
+            width: 100%;
+            border-radius: 5px;
+        }
+    </style>
+{% endblock %}
+
+{% block url_block %}
+    <span> > </span> <a href="/kind_admin/" style="color: white;font-weight: bold">{{ app_name }}</a>
+    <span> > </span> <a href="/kind_admin/{{ app_name }}/{{ table_name }}/" style="color: white;font-weight: bold">{{ table_name_detail }}</a>
+    <span> > change</span>
+{% endblock %}
+
+
+
+{% block container %}
+    <div style="margin-bottom: 200px">
+          <span style="color: red;"> {{ form_obj.errors }} </span>
+        <form class="form-horizontal" method="POST" onsubmit="return SelectAllChosenData();">
+            {% for field in form_obj %}
+              <div class="form-group">
+                <label for="inputEmail3" class="col-sm-2 control-label" style="font-weight: normal">
+                    {% if field.field.required %}
+                        <span style="font-weight: bold;color: gold">{{ field.label }}</span>
+                    {% else %}
+                        {{ field.label }}
+                    {% endif %}
+                </label>
+
+
+                <div class="col-sm-10">
+                    {% if field.name in admin_class.filter_horizontal %}
+                        <div class="col-md-5" >
+                            {% get_m2m_obj_list admin_class field form_obj as m2m_obj_list %}
+                            <select multiple class="filter-select-box" id="id_{{ field.name }}_from">
+                                {% if field.name in admin_class.readonly_fields and not admin_class.is_add_form %}
+                                    {% for obj in m2m_obj_list %}  <!-- 如果多对多是readonly字段就不绑定点击事件 -->
+                                        <option value="{{ obj.id }}" disabled>{{ obj }}</option>
+                                    {% endfor %}
+                                {% else %}
+                                    {% for obj in m2m_obj_list %}
+                                        <option ondblclick="MoveElementTo(this,'id_{{ field.name }}_to','id_{{ field.name }}_from');" value="{{ obj.id }}">{{ obj }}</option>
+                                    {% endfor %}
+                                {% endif %}
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            箭头
+                        </div>
+                        <div class="col-md-5">      <!-- 多对多字段显示已经选中的 -->
+                            {% get_m2m_selected_obj_list form_obj field as selected_obj_list %}
+                            <select multiple class="filter-select-box"  id="id_{{ field.name }}_to" tag="chosen_list" name="{{ field.name }}">
+                                {% if field.name in admin_class.readonly_fields %}
+                                    {% for obj in selected_obj_list %}  <!-- 如果多对多是readonly字段就不绑定点击事件 -->
+                                        <option disabled value="{{ obj.id }}">{{ obj }}</option>
+                                    {% endfor %}
+                                {% else %}
+                                    {% for obj in selected_obj_list %}
+                                        <option ondblclick="MoveElementTo(this,'id_{{ field.name }}_from','id_{{ field.name }}_to');" value="{{ obj.id }}">{{ obj }}</option>
+                                    {% endfor %}
+                                {% endif %}
+                                {{ field.error }}
+                            </select>
+                        </div>
+                        <span style="color: red">{{ field.errors.as_text }}</span>
+                    {% else %}
+                        {% if field.name == 'password' %}
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <input placeholder="输入密码" type="password" name="password" required="" id="id_password" class="form-control" maxlength="128">
+                                    <span style="color: red">{{ field.errors.as_text }}</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <input placeholder="重复密码" type="password" name="password2" required="" id="id_password" class="form-control" maxlength="128">
+                                    <span style="color: red"></span>
+                                </div>
+                            </div>
+                        {% else %}
+                            {{ field }}         {# 非多对多字段复选框显示    #}
+                            <span style="color: gray">{{ field.help_text }}</span>
+                            <span style="color: red">{{ field.errors.as_text }}</span>
+                        {% endif %}
+
+                    {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+
+
+
+            {% if not admin_class.readonly_table %}
+                <div style="margin-top: 50px;margin-left: 200px">
+                    <button type="submit" class="btn btn-success pull-right">Save</button>
+                </div>
+            {% endif %}
+              <div>
+                      <ul>
+                        {% for k,v in errors.items %}
+                        <li style="color: red;">{{ k }}:{{ v }}</li>
+                      </ul>
+                  {% endfor %}
+              </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        function SelectAllChosenData() {
+            $("select[tag='chosen_list'] option").each(function () {
+                $(this).prop('selected',true);  // 提交表单前将右边复选框内容全部选中
+            });
+            //remove all disabled attrs
+            var tag = $('form').find("[disabled]").removeAttr('disabled');
+            return true
+        }
+
+        function MoveElementTo(ele,target_id,new_target_id) {
+            var opt_ele = "<option ondblclick='MoveElementTo(this," + '"' + new_target_id + '",' +   '"' + target_id + '",' +   ")' value=" + $(ele).val() + ">" + $(ele).text() + "</option>";
+            $("#" + target_id).append(opt_ele);
+            $(ele).remove();
+        }
+    </script>
+{% endblock %}

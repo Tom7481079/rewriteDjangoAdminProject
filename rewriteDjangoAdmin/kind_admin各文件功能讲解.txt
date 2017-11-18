@@ -1,0 +1,57 @@
+C:
+└─DjangoAdminUser_0922
+    │  db.sqlite3					#数据库
+    │  manage.py					#Django管理
+    │
+    ├─DjangoAdminUser_0922
+    │  │  settings.py				    #指定使用哪个表代替Django Admin的User表，指定注销后跳转页面
+    │  │  urls.py                     #项目总url路径
+    │
+    ├─crm
+    │  │  admin.py					#原生Django Admin管理配置
+    │  │  models.py					#使用自定义的UserProfile表代替Django Admin原生的User表
+    │
+    ├─kind_admin
+    │  │  forms.py					#动态生成ModelForm类，用来对数据做验证
+    │  │  kind_admin.py				#重写Django Admin
+    │  │  urls.py					    #kind_admin这个APP中自己的url路径
+    │  │  utils.py					#更具过滤，搜索，排序条件返回执行内容
+    │  │  views.py					#kind_admin增删改查，登录注销的管理函数
+    │  │
+    │  ├─permissions
+    │  │  │  permission.py			#判断是否有权限
+    │  │  │  permission_list.py		#定义权限字典
+    │  │
+    │  ├─templatetags
+    │  │  │  tags.py				    #展示表中数据，分页，在前端生成搜索，过滤框
+    │
+    ├─static
+    │  ├─css
+    │  │      bootstrap-theme.css	    #对 bootstrap.css 基础样式的重定义(可以没有)
+    │  │      bootstrap.css			#bootstrap全局css样式
+    │  │      dashboard.css			#下载bootstrap后台模板时的css样式
+    │  │
+    │  ├─fonts						#bootstrap图标样式，必须有但不必在文件中引入
+    │  │      glyphicons-halflings-regular.eot
+    │  │      glyphicons-halflings-regular.svg
+    │  │      glyphicons-halflings-regular.ttf
+    │  │      glyphicons-halflings-regular.woff
+    │  │      glyphicons-halflings-regular.woff2
+    │  │
+    │  └─js
+    │          bootstrap.js			#bootstrap的js文件
+    │          jquery-1.12.4.js		#jquery的js文件，引入时必须显示引入jQuery的js文件
+    │
+    └─templates
+        └─kind_admin
+                base.html						#仅引入必要的css和js文件路径
+                kind_admin_index.html			#展示APP名和表名
+                display_table_obj.html			#展示表中具体信息
+
+                table_obj_add.html				#增加
+                table_obj_change.html			#修改
+                table_obj_delete.html			#删除
+
+                login.html						#kind_admin登录界面
+                password_reset.html				#修改Django Admin用户表的密码
+                rewrite_add_user_page.html		#添加Django Admin用户时密码明文，用独立页面解决

@@ -1,0 +1,21 @@
+{% extends 'kind_admin/kind_admin_index.html' %}
+{% load tags %}
+{% block url_block %}
+    <span> > </span> <a href="/kind_admin/" style="color: white;font-weight: bold">{{ app_name }}</a>
+    <span> > </span> <a href="/kind_admin/{{ app_name }}/{{ table_name }}/" style="color: white;font-weight: bold">{{ table_name_detail }}</a>
+    <span> > delete</span>
+{% endblock %}
+{% block container %}
+    <div style="margin-bottom: 200px">
+
+        <form class="form-horizontal" method="POST">
+            <h1>此条数据有多项关联，确定删除？</h1>
+            <input type="hidden" name="selected_ids" value="{{ selected_ids }}">
+            <input type="hidden" value="yes" name="delete_confirm">
+            <input type="hidden" value="{{ action }}" name="action">
+            <input type="submit" class="btn btn-danger" value="Yes, I'am sure">
+            <a class="btn btn-info" href="{% url 'display_table_obj' app_name table_name %}">No, Tack me back</a>
+
+        </form>
+    </div>
+{% endblock %}

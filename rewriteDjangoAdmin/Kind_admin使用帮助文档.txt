@@ -1,0 +1,12 @@
+1. 重写Django Admin User表认证
+	1）创建crm的APP（并注册crm）
+	2）复制crm/models.py中的内容
+	3）配置settings.py中的内容并添加：
+	   AUTH_USER_MODEL = 'crm.UserProfile'    #app名.表名 重写Django admin用户认证
+	   LOGIN_URL = '/kind_admin/login/'       #告诉Django注销后挑传到那个路径
+	4）执行创建表命令
+2. 将我们写的kind_admin引入到项目中
+	1）在project的urls.py中添加：
+	   url(r'^kind_admin/', include('kind_admin.urls')),
+	2）将kind_admin, static, templates中的内容复制到project中
+	3）将APP   kind_admin注册到settings.py
